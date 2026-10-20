@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Student Management System</title>
+
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -90,16 +91,17 @@
         }
     </style>
 </head>
+
 <body>
 
     <header>
         <h1>Student Management System</h1>
-        <p>Add, view, and manage student records in one place.</p>
+        <p>Manage student information easily</p>
     </header>
 
     <nav>
         <a href="index.html">Home</a>
-        <a href="Login.html">Login</a>
+        <a href="login.html">Login</a>
     </nav>
 
     <main>
@@ -148,7 +150,18 @@
         const studentList = document.getElementById("studentList");
         const emptyMessage = document.getElementById("emptyMessage");
 
-        let students = [];
+        // Load previously saved student records.
+        let students = JSON.parse(
+            localStorage.getItem("students") || "[]"
+        );
+
+        // Save student records in the browser.
+        function saveStudents() {
+            localStorage.setItem(
+                "students",
+                JSON.stringify(students)
+            );
+        }
 
         function displayStudents() {
             studentList.innerHTML = "";
@@ -171,6 +184,7 @@
 
                 deleteButton.addEventListener("click", () => {
                     students.splice(index, 1);
+                    saveStudents();
                     displayStudents();
                 });
 
@@ -189,17 +203,23 @@
             const roll = document.getElementById("roll").value.trim();
             const email = document.getElementById("email").value.trim();
 
-            if (students.some(student => student.roll === roll)) {
+            if (students.some(student =>
+                student.roll.toLowerCase() === roll.toLowerCase()
+            )) {
                 alert("This roll number already exists.");
                 return;
             }
 
             students.push({ name, roll, email });
 
+            // Save immediately after adding a student.
+            saveStudents();
+
             form.reset();
             displayStudents();
         });
 
+        // Display saved records when the page opens.
         displayStudents();
     </script>
 
