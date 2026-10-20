@@ -67,19 +67,60 @@
         </form>
 
         <p id="message"></p>
+        <a href="register.html">New student? Register here</a>
 
         <a href="index.html">Back to Home</a>
     </div>
 
-    <script>
-        document.getElementById("loginForm")
-            .addEventListener("submit", function(event) {
-                event.preventDefault();
+<script>
+    const form = document.getElementById("loginForm");
+const message = document.getElementById("message");
 
-                document.getElementById("message").textContent =
-                    "Demo login only. Authentication is not configured yet.";
-            });
-    </script>
+form.addEventListener("submit", function(event) {
+event.preventDefault();
+
+const email = document.getElementById("email").value.trim().toLowerCase();
+const password = document.getElementById("password").value;
+
+let users = [];
+
+try {
+    users = JSON.parse(localStorage.getItem("registeredUsers") || "[]");
+
+    if (!Array.isArray(users)) {
+        users = [];
+    }
+} catch (error) {
+    message.style.color = "red";
+    message.textContent = "Unable to read registered accounts.";
+    return;
+}
+
+const user = users.find(function(account) {
+    return account.email === email &&
+           account.password === password;
+});
+
+if (user) {
+    sessionStorage.setItem("loggedInUser", JSON.stringify({
+        name: user.name,
+        email: user.email
+    }));
+
+    message.style.color = "green";
+    message.textContent = "Login successful! Redirecting...";
+
+    setTimeout(function() {
+        window.location.href = "index.html";
+    }, 1000);
+
+} else {
+    message.style.color = "red";
+    message.textContent = "Invalid email or password. Please register first.";
+}
+
+});
+</script>
 
 </body>
 </html>

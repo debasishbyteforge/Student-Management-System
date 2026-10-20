@@ -89,6 +89,9 @@
             padding: 15px;
             color: #555;
         }
+        #userinfo {
+            color: white !important;
+        }
     </style>
 </head>
 
@@ -100,9 +103,13 @@
     </header>
 
     <nav>
-        <a href="index.html">Home</a>
-        <a href="login.html">Login</a>
-    </nav>
+    <a href="index.html">Home</a>
+    <a href="login.html" id="loginLink">Login</a>
+    <a href="register.html">Register</a>
+    <span id="userInfo"></span>
+    <button type="button" id="logoutButton" hidden>Logout</button>
+</nav>
+
 
     <main>
         <section class="card">
@@ -146,6 +153,26 @@
     </footer>
 
     <script>
+        const logoutButton = document.getElementById("logoutButton");
+        const loggedInUser = JSON.parse(
+    sessionStorage.getItem("loggedInUser") || "null"
+);
+
+const loginLink = document.getElementById("loginLink");
+const userInfo = document.getElementById("userInfo");
+
+if (loggedInUser) {
+    loginLink.hidden = true;
+    userInfo.textContent = "Welcome, " + loggedInUser.name + "!";
+    logoutButton.hidden=false;
+}else{
+    logoutButton.hidden=true
+    userinfo.style.color = "white";
+}
+logoutButton.addEventListener("click", function() {
+    sessionStorage.removeItem("loggedInUser");
+    window.location.href = "login.html";
+});
         const form = document.getElementById("studentForm");
         const studentList = document.getElementById("studentList");
         const emptyMessage = document.getElementById("emptyMessage");

@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Registration</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f2f5f9;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+        }
+
+        .register-box {
+            background: white;
+            width: 320px;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 3px 12px #00000018;
+        }
+
+        h2 {
+            text-align: center;
+            color: #174a8b;
+        }
+
+        input, button {
+            width: 100%;
+            box-sizing: border-box;
+            padding: 12px;
+            margin: 10px 0;
+        }
+
+        button {
+            background: #174a8b;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        a {
+            display: block;
+            text-align: center;
+            margin-top: 15px;
+        }
+
+        #message {
+            overflow-wrap: anywhere;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="register-box">
+        <h2>Student Registration</h2>
+
+        <form id="registerForm">
+            <input
+                type="text"
+                id="name"
+                placeholder="Full Name"
+                required
+            >
+
+            <input
+                type="email"
+                id="email"
+                placeholder="Email Address"
+                required
+            >
+
+            <input
+                type="password"
+                id="password"
+                placeholder="Create Password"
+                minlength="8"
+                required
+            >
+
+            <input
+                type="password"
+                id="confirmPassword"
+                placeholder="Confirm Password"
+                minlength="8"
+                required
+            >
+
+            <button type="submit">Register</button>
+        </form>
+
+        <p id="message" role="status"></p>
+
+        <a href="login.html">Already registered? Login</a>
+        <a href="index.html">Back to Home</a>
+    </div>
+
+    <script>
+        const form = document.getElementById("registerForm");
+        const message = document.getElementById("message");
+
+        form.addEventListener("submit", function(event) {
+            event.preventDefault();
+
+            const name = document.getElementById("name").value.trim();
+            const email = document.getElementById("email").value.trim().toLowerCase();
+            const password = document.getElementById("password").value;
+            const confirmPassword = document.getElementById("confirmPassword").value;
+
+            if (name === "") {
+                message.textContent = "Please enter your name.";
+                message.style.color = "red";
+                return;
+            }
+
+            if (password !== confirmPassword) {
+                message.textContent = "Passwords do not match.";
+                message.style.color = "red";
+                return;
+            }
+
+            let users = [];
+
+            try {
+                users = JSON.parse(localStorage.getItem("registeredUsers")) || [];
+
+                if (!Array.isArray(users)) {
+                    users = [];
+                }
+            } catch (error) {
+                message.textContent = "Unable to read saved accounts.";
+                message.style.color = "red";
+                return;
+            }
+
+            const existingUser = users.find(function(user) {
+                return user.email === email;
+            });
+
+            if (existingUser) {
+                message.textContent = "This email is already registered.";
+                message.style.color = "red";
+                return;
+            }
+
+            users.push({
+                name: name,
+                email: email,
+                password: password
+            });
+
+            try {
+                localStorage.setItem("registeredUsers", JSON.stringify(users));
+            } catch (error) {
+                message.textContent = "Unable to save your account.";
+                message.style.color = "red";
+                return;
+            }
+
+            message.style.color = "green";
+            message.textContent = "Registration successful! Redirecting to login...";
+
+            setTimeout(function() {
+                window.location.href = "login.html";
+            }, 1500);
+        });
+    </script>
+
+</body>
+</html>
