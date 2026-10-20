@@ -1,104 +1,110 @@
-<!DOCTYPE html><html lang="en">
+<!DOCTYPE html>
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Student Management System</title><style>
-    body {
-        font-family: Arial, sans-serif;
-        margin: 0;
-        background: #f2f5f9;
-        color: #222;
-    }
+    <title>Student Management System</title>
 
-    header {
-        background: #174a8b;
-        color: white;
-        text-align: center;
-        padding: 22px;
-    }
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            background: #f2f5f9;
+            color: #222;
+        }
 
-    nav {
-        background: #123663;
-        padding: 14px;
-        text-align: center;
-    }
+        header {
+            background: #174a8b;
+            color: white;
+            text-align: center;
+            padding: 22px;
+        }
 
-    nav a {
-        color: white;
-        text-decoration: none;
-        margin: 0 15px;
-    }
+        nav {
+            background: #123663;
+            padding: 14px;
+            text-align: center;
+        }
 
-    #userInfo {
-        color: white;
-        margin: 0 10px;
-    }
+        nav a {
+            color: white;
+            text-decoration: none;
+            margin: 0 15px;
+        }
 
-    main {
-        max-width: 900px;
-        margin: 30px auto;
-        padding: 20px;
-    }
+        #userInfo {
+            color: white;
+            margin: 0 10px;
+        }
 
-    .card {
-        background: white;
-        padding: 22px;
-        margin-bottom: 20px;
-        border-radius: 10px;
-        box-shadow: 0 2px 8px #00000012;
-    }
+        main {
+            max-width: 900px;
+            margin: 30px auto;
+            padding: 20px;
+        }
 
-    input, button {
-        padding: 10px;
-        margin: 5px 0;
-        box-sizing: border-box;
-    }
+        .card {
+            background: white;
+            padding: 22px;
+            margin-bottom: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px #00000012;
+        }
 
-    input {
-        width: 100%;
-    }
+        input, button {
+            padding: 10px;
+            margin: 5px 0;
+            box-sizing: border-box;
+        }
 
-    button {
-        background: #174a8b;
-        color: white;
-        border: none;
-        border-radius: 5px;
-        cursor: pointer;
-    }
+        input {
+            width: 100%;
+        }
 
-    table {
-        width: 100%;
-        border-collapse: collapse;
-        margin-top: 15px;
-    }
+        button {
+            background: #174a8b;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
 
-    th, td {
-        border: 1px solid #ddd;
-        padding: 10px;
-        text-align: left;
-    }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
 
-    th {
-        background: #e5edf8;
-    }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: left;
+        }
 
-    .delete {
-        background: #c62828;
-    }
+        th {
+            background: #e5edf8;
+        }
 
-    .edit {
-        background: #2e7d32;
-        margin-right: 5px;
-    }
+        .delete {
+            background: #c62828;
+        }
 
-    footer {
-        text-align: center;
-        padding: 15px;
-        color: #555;
-    }
-</style>
+        .edit {
+            background: #2e7d32;
+            margin-right: 5px;
+        }
 
-</head><body><header>
+        footer {
+            text-align: center;
+            padding: 15px;
+            color: #555;
+        }
+    </style>
+</head>
+
+<body>
+
+<header>
     <h1>Student Management System</h1>
     <p>Manage student information easily</p>
 </header>
@@ -113,7 +119,7 @@
 
 <main>
     <section class="card">
-        <h2>Add Student</h2>
+        <h2 id="formHeading">Add Student</h2>
 
         <form id="studentForm">
             <input type="text" id="name"
@@ -153,9 +159,8 @@
 </footer>
 
 <script>
-    const logoutButton = document.getElementById("logoutButton");
-    const loginLink = document.getElementById("loginLink");
-    const userInfo = document.getElementById("userInfo");
+    // STEP 1: Protect the dashboard.
+    // Users must log in before accessing student records.
 
     let loggedInUser = null;
 
@@ -167,147 +172,169 @@
         loggedInUser = null;
     }
 
-    if (loggedInUser) {
+    if (
+        !loggedInUser ||
+        typeof loggedInUser !== "object" ||
+        !loggedInUser.email
+    ) {
+        window.location.replace("login.html");
+    } else {
+        initializeDashboard();
+    }
+
+    function initializeDashboard() {
+        const logoutButton = document.getElementById("logoutButton");
+        const loginLink = document.getElementById("loginLink");
+        const userInfo = document.getElementById("userInfo");
+
         loginLink.hidden = true;
         userInfo.textContent = "Welcome, " + loggedInUser.name + "!";
         logoutButton.hidden = false;
-    } else {
-        logoutButton.hidden = true;
-    }
 
-    logoutButton.addEventListener("click", function() {
-        sessionStorage.removeItem("loggedInUser");
-        window.location.href = "login.html";
-    });
-
-    const form = document.getElementById("studentForm");
-    const studentList = document.getElementById("studentList");
-    const emptyMessage = document.getElementById("emptyMessage");
-
-    let students = [];
-
-    try {
-        students = JSON.parse(
-            localStorage.getItem("students") || "[]"
-        );
-
-        if (!Array.isArray(students)) {
-            students = [];
-        }
-    } catch (error) {
-        students = [];
-    }
-
-    function saveStudents() {
-        localStorage.setItem("students", JSON.stringify(students));
-    }
-
-    function displayStudents() {
-        studentList.innerHTML = "";
-
-        students.forEach((student, index) => {
-            const row = document.createElement("tr");
-
-            [student.name, student.roll, student.email].forEach(value => {
-                const cell = document.createElement("td");
-                cell.textContent = value;
-                row.appendChild(cell);
-            });
-
-            const actionCell = document.createElement("td");
-
-            // Edit button
-            const editButton = document.createElement("button");
-            editButton.textContent = "Edit";
-            editButton.className = "edit";
-
-            editButton.addEventListener("click", function() {
-                document.getElementById("name").value = student.name;
-                document.getElementById("roll").value = student.roll;
-                document.getElementById("email").value = student.email;
-
-                form.dataset.editIndex = index;
-
-                form.querySelector('button[type="submit"]').textContent =
-                    "Update Student";
-
-                document.getElementById("name").focus();
-            });
-
-            // Delete button
-            const deleteButton = document.createElement("button");
-            deleteButton.textContent = "Delete";
-            deleteButton.className = "delete";
-
-            deleteButton.addEventListener("click", function() {
-                students.splice(index, 1);
-
-                if (form.dataset.editIndex !== undefined) {
-                    delete form.dataset.editIndex;
-                    form.reset();
-
-                    form.querySelector('button[type="submit"]').textContent =
-                        "Add Student";
-                }
-
-                saveStudents();
-                displayStudents();
-            });
-
-            actionCell.appendChild(editButton);
-            actionCell.appendChild(deleteButton);
-
-            row.appendChild(actionCell);
-            studentList.appendChild(row);
+        logoutButton.addEventListener("click", function() {
+            sessionStorage.removeItem("loggedInUser");
+            window.location.replace("login.html");
         });
 
-        emptyMessage.hidden = students.length > 0;
-    }
+        const form = document.getElementById("studentForm");
+        const studentList = document.getElementById("studentList");
+        const emptyMessage = document.getElementById("emptyMessage");
+        const formHeading = document.getElementById("formHeading");
+        const submitButton = form.querySelector('button[type="submit"]');
 
-    form.addEventListener("submit", function(event) {
-        event.preventDefault();
+        let students = [];
 
-        const name = document.getElementById("name").value.trim();
-        const roll = document.getElementById("roll").value.trim();
-        const email = document.getElementById("email").value.trim();
+        try {
+            students = JSON.parse(
+                localStorage.getItem("students") || "[]"
+            );
 
-        const editIndex = form.dataset.editIndex;
-const duplicateRoll = students.some(function(student, index) {
-    return student.roll.toLowerCase() === roll.toLowerCase()
-        && index !== Number(editIndex);
-});
-
-const duplicateEmail = students.some(function(student, index) {
-    return student.email.toLowerCase() === email.toLowerCase()
-        && index !== Number(editIndex);
-});
-
-if (duplicateRoll) {
-    alert("This roll number already exists.");
-    return;
-}
-
-if (duplicateEmail) {
-    alert("This email address already exists.");
-    return;
-}
-
-        if (editIndex !== undefined) {
-            students[Number(editIndex)] = { name, roll, email };
-
-            delete form.dataset.editIndex;
-            form.querySelector('button[type="submit"]').textContent =
-                "Add Student";
-        } else {
-            students.push({ name, roll, email });
+            if (!Array.isArray(students)) {
+                students = [];
+            }
+        } catch (error) {
+            students = [];
         }
 
-        saveStudents();
-        form.reset();
-        displayStudents();
-    });
+        function saveStudents() {
+            localStorage.setItem("students", JSON.stringify(students));
+        }
 
-    displayStudents();
+        function resetStudentForm() {
+            delete form.dataset.editIndex;
+            form.reset();
+            submitButton.textContent = "Add Student";
+            formHeading.textContent = "Add Student";
+        }
+
+        function displayStudents() {
+            studentList.innerHTML = "";
+
+            students.forEach(function(student, index) {
+                const row = document.createElement("tr");
+
+                [student.name, student.roll, student.email].forEach(
+                    function(value) {
+                        const cell = document.createElement("td");
+                        cell.textContent = value;
+                        row.appendChild(cell);
+                    }
+                );
+
+                const actionCell = document.createElement("td");
+
+                // Edit student
+                const editButton = document.createElement("button");
+                editButton.textContent = "Edit";
+                editButton.className = "edit";
+
+                editButton.addEventListener("click", function() {
+                    document.getElementById("name").value = student.name;
+                    document.getElementById("roll").value = student.roll;
+                    document.getElementById("email").value = student.email;
+
+                    form.dataset.editIndex = index;
+                    submitButton.textContent = "Update Student";
+                    formHeading.textContent = "Edit Student";
+
+                    document.getElementById("name").focus();
+                });
+
+                // Delete student
+                const deleteButton = document.createElement("button");
+                deleteButton.textContent = "Delete";
+                deleteButton.className = "delete";
+
+                deleteButton.addEventListener("click", function() {
+                    students.splice(index, 1);
+
+                    if (form.dataset.editIndex !== undefined) {
+                        resetStudentForm();
+                    }
+
+                    saveStudents();
+                    displayStudents();
+                });
+
+                actionCell.appendChild(editButton);
+                actionCell.appendChild(deleteButton);
+
+                row.appendChild(actionCell);
+                studentList.appendChild(row);
+            });
+
+            emptyMessage.hidden = students.length > 0;
+        }
+
+        // Add or update a student
+        form.addEventListener("submit", function(event) {
+            event.preventDefault();
+
+            const name = document.getElementById("name").value.trim();
+            const roll = document.getElementById("roll").value.trim();
+            const email = document.getElementById("email")
+                .value.trim().toLowerCase();
+
+            if (!name || !roll || !email) {
+                alert("Please fill in all fields.");
+                return;
+            }
+
+            const editIndex = form.dataset.editIndex;
+
+            const duplicateRoll = students.some(function(student, index) {
+                return student.roll.toLowerCase() === roll.toLowerCase()
+                    && index !== Number(editIndex);
+            });
+
+            const duplicateEmail = students.some(function(student, index) {
+                return student.email.toLowerCase() === email
+                    && index !== Number(editIndex);
+            });
+
+            if (duplicateRoll) {
+                alert("This roll number already exists.");
+                return;
+            }
+
+            if (duplicateEmail) {
+                alert("This email address already exists.");
+                return;
+            }
+
+            if (editIndex !== undefined) {
+                students[Number(editIndex)] = { name, roll, email };
+            } else {
+                students.push({ name, roll, email });
+            }
+
+            saveStudents();
+            resetStudentForm();
+            displayStudents();
+        });
+
+        displayStudents();
+    }
 </script>
 
 </body>
