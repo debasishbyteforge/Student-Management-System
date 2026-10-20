@@ -272,16 +272,25 @@
         const email = document.getElementById("email").value.trim();
 
         const editIndex = form.dataset.editIndex;
+const duplicateRoll = students.some(function(student, index) {
+    return student.roll.toLowerCase() === roll.toLowerCase()
+        && index !== Number(editIndex);
+});
 
-        const duplicateRoll = students.some(function(student, index) {
-            return student.roll.toLowerCase() === roll.toLowerCase()
-                && index !== Number(editIndex);
-        });
+const duplicateEmail = students.some(function(student, index) {
+    return student.email.toLowerCase() === email.toLowerCase()
+        && index !== Number(editIndex);
+});
 
-        if (duplicateRoll) {
-            alert("This roll number already exists.");
-            return;
-        }
+if (duplicateRoll) {
+    alert("This roll number already exists.");
+    return;
+}
+
+if (duplicateEmail) {
+    alert("This email address already exists.");
+    return;
+}
 
         if (editIndex !== undefined) {
             students[Number(editIndex)] = { name, roll, email };
